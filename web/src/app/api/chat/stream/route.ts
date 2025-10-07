@@ -5,30 +5,32 @@ const messageSchema = z.object({
   content: z.string().min(1),
 });
 
-const requestSchema = z.object({
+const sendPayloadSchema = z.object({
   messages: z.array(messageSchema).min(1),
   model: z.string().optional(),
   temperature: z.number().min(0).max(2).optional(),
 });
 
 const encoder = new TextEncoder();
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const tokens = [
-  "Streaming",
-  "mock",
-  "response",
-  "for",
-  "mistral",
-  "le",
-  "chat++",
-  "integration",
-  "preview.",
+
+const delay = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+const chunks = [
+  "Streaming mock response",
+  "for the Mistral",
+  "Le Chat++ preview.",
+  "This endpoint",
+  "simulates latency",
+  "with placeholder tokens",
+  "so the UI can",
+  "render incremental text.",
 ];
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
 
-  const parsed = requestSchema.safeParse(body);
+  const parsed = sendPayloadSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
       {
@@ -41,25 +43,23 @@ export async function POST(request: Request) {
 
   const stream = new ReadableStream({
     async start(controller) {
-      try {
-        for (const token of tokens) {
-          controller.enqueue(encoder.encode(`data: ${token}\n\n`));
-          await delay(150);
-        }
-        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-      } catch (error) {
-        controller.error(error);
-      } finally {
-        controller.close();
+      for (const chunk of chunks) {
+        controller.enqueue(encoder.encode(`${chunk} `));
+        await delay(randomDelay());
       }
+      controller.enqueue(encoder.encode("\n"));
+      controller.close();
     },
   });
 
   return new Response(stream, {
     headers: {
-      "Content-Type": "text/event-stream",
+      "Content-Type": "text/plain; charset=utf-8",
       "Cache-Control": "no-cache",
-      Connection: "keep-alive",
     },
   });
+}
+
+function randomDelay(): number {
+  return 100 + Math.floor(Math.random() * 150);
 }
