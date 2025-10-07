@@ -380,7 +380,7 @@ function isDefaultMessageSet(messages: ChatMessage[]): boolean {
   if (messages.length === 0) return true;
   if (messages.length === 1) {
     const [message] = messages;
-    return message.id === SYSTEM_GREETING.id && message.role === "system";
+    return Boolean(message && message.id === SYSTEM_GREETING.id && message.role === "system");
   }
   return false;
 }

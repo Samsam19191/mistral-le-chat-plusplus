@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-2 px-4 sm:flex-row sm:items-center sm:justify-between">
         <p>© {year} mistral-le-chat-plusplus. All rights reserved.</p>
         <a
-          href="https://github.com/your-org/mistral-le-chat-plusplus"
+          href="https://github.com/Samsam19191/mistral-le-chat-plusplus"
           className="inline-flex items-center gap-1 text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-300"
         >
           View repository

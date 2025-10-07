@@ -1,0 +1,10 @@
+{"id":"q01","user":"Summarize this: The Eiffel Tower is in Paris.","expect_contains":["Eiffel Tower","Paris"]}
+{"id":"q02","user":"What is 2 + 2?","expect_contains":["4"]}
+{"id":"q03","user":"Name the capital of Japan.","expect_contains":["Tokyo"]}
+{"id":"q04","user":"Complete this sentence: The sky is...","expect_contains":["blue"]}
+{"id":"q05","user":"What animal says 'meow'?","expect_contains":["cat"]}
+{"id":"q06","user":"How many days are in a week?","expect_contains":["7","seven"]}
+{"id":"q07","user":"What do you call frozen water?","expect_contains":["ice"]}
+{"id":"q08","user":"Name one color in the rainbow.","expect_contains":["red","orange","yellow","green","blue","indigo","violet"]}
+{"id":"q09","user":"What planet do we live on?","expect_contains":["Earth"]}
+{"id":"q10","user":"Complete: H2O is the chemical formula for...","expect_contains":["water"]}
