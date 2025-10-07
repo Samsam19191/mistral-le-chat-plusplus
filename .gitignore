@@ -57,3 +57,4 @@ Thumbs.db
 .pnpm-store/
 .cache/
 *.local.*
+web/next-env.d.ts
