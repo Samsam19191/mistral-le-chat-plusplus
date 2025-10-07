@@ -6,6 +6,7 @@ import {
   type StreamSettings,
   type SendPayload,
 } from "../types";
+import { clearMessages, loadMessages, saveMessages } from "../persist";
 
 const SYSTEM_GREETING: ChatMessage = {
   id: "system-greeting",
@@ -107,16 +108,51 @@ export function useChat({
     [baseDefaults, settings],
   );
 
-  const initialSnapshotRef = useRef<ChatMessage[]>(
-    cloneMessages(initialMessages),
-  );
-  const [messages, setMessages] = useState<ChatMessage[]>(
-    initialSnapshotRef.current,
-  );
+  const initialSnapshotRef = useRef<ChatMessage[]>(cloneMessages(initialMessages));
+  const [messages, setMessages] = useState<ChatMessage[]>(initialSnapshotRef.current);
+
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
+  const saveTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const stored = loadMessages();
+    if (stored && stored.length > 0) {
+      const cloned = cloneMessages(stored);
+      initialSnapshotRef.current = cloned;
+      setMessages(cloned);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    if (saveTimeoutRef.current) {
+      window.clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = window.setTimeout(() => {
+      const shouldPersist = !isDefaultMessageSet(messages);
+      if (shouldPersist) {
+        saveMessages(messages);
+      } else {
+        clearMessages();
+      }
+      saveTimeoutRef.current = null;
+    }, 200);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        window.clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+      }
+    };
+  }, [messages]);
 
   const latencyStartRef = useRef<number | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -275,10 +311,15 @@ export function useChat({
 
   const clear = useCallback(() => {
     resetController();
-    setMessages(cloneMessages(initialSnapshotRef.current));
+    const baseline = cloneMessages(initialMessages);
+    initialSnapshotRef.current = baseline;
+    setMessages(baseline);
     setError(null);
     setLatencyMs(null);
     setInput("");
+    if (typeof window !== "undefined") {
+      clearMessages();
+    }
   }, [resetController]);
 
   return {
@@ -333,4 +374,13 @@ async function safeParseError(response: Response): Promise<string | null> {
 
 function cloneMessages(messages: ChatMessage[]): ChatMessage[] {
   return messages.map((message) => ({ ...message }));
+}
+
+function isDefaultMessageSet(messages: ChatMessage[]): boolean {
+  if (messages.length === 0) return true;
+  if (messages.length === 1) {
+    const [message] = messages;
+    return message.id === SYSTEM_GREETING.id && message.role === "system";
+  }
+  return false;
 }

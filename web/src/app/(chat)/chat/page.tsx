@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Button from "@/components/ui/button";
 import { useChat } from "@/lib/hooks/useChat";
@@ -27,17 +27,53 @@ export default function ChatPage() {
   } = useChat();
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const messagesEndRef = useRef<HTMLLIElement | null>(null);
+  const listContainerRef = useRef<HTMLDivElement | null>(null);
+  const hasScrolledOnceRef = useRef(false);
+  const [config, setConfig] = useState<{ model?: string; mode?: "mock" | "real" } | null>(null);
 
   useEffect(() => {
     textareaRef.current?.focus();
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const container = listContainerRef.current;
+    if (!container) return;
+    const behavior = hasScrolledOnceRef.current ? "smooth" : "auto";
+    container.scrollTo({ top: container.scrollHeight, behavior });
+    hasScrolledOnceRef.current = true;
   }, [messages]);
 
+  useEffect(() => {
+    let active = true;
+    async function loadConfig() {
+      try {
+        const response = await fetch("/api/chat/config");
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!active) return;
+        setConfig({ model: data.model, mode: data.mode });
+      } catch {
+        // ignore config load errors
+      }
+    }
+
+    loadConfig();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const sendDisabled = isStreaming || !input.trim();
+
+  const modeIsMock = config?.mode === "mock";
+  const modeBadgeClass =
+    config?.mode == null
+      ? "bg-zinc-400"
+      : config.mode === "mock"
+        ? "bg-emerald-600"
+        : "bg-sky-600";
+  const modeLabel = config?.mode == null ? "…" : config.mode === "mock" ? "MOCK" : "REAL";
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
@@ -95,6 +131,7 @@ export default function ChatPage() {
         ) : null}
 
         <div
+          ref={listContainerRef}
           className="max-h-[360px] overflow-y-auto rounded-md border border-zinc-200 bg-white/60 p-3 dark:border-zinc-800 dark:bg-zinc-900/40"
           aria-live="polite"
         >
@@ -109,7 +146,6 @@ export default function ChatPage() {
                 return (
                   <li
                     key={message.id}
-                    ref={isLast ? messagesEndRef : undefined}
                     className="rounded-md border border-zinc-100 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
                   >
                     <div className="mb-1 flex items-center justify-between text-xs font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
@@ -120,12 +156,35 @@ export default function ChatPage() {
                     </div>
                     <p className="whitespace-pre-wrap text-zinc-700 dark:text-zinc-200">
                       {message.content}
+                      {message.role === "assistant" && isLast && isStreaming ? (
+                        <span className="ml-1 inline-block animate-pulse">▌</span>
+                      ) : null}
                     </p>
                   </li>
                 );
               })
             )}
           </ul>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 rounded-md border border-zinc-200 bg-white/80 px-3 py-2 text-xs text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/70 dark:text-zinc-300">
+          <div>
+            <span className="font-semibold text-zinc-900 dark:text-zinc-100">Model:</span>{" "}
+            <span>{config?.model ?? "—"}</span>
+          </div>
+          <div
+            className={`rounded-full px-2 py-0.5 text-[0.7rem] font-semibold tracking-wide text-white ${modeBadgeClass}`}
+          >
+            {modeLabel}
+          </div>
+          <div>
+            <span className="font-semibold text-zinc-900 dark:text-zinc-100">Latency:</span>{" "}
+            <span>{latencyMs != null ? `${Math.round(latencyMs)} ms` : "—"}</span>
+          </div>
+          <div>
+            <span className="font-semibold text-zinc-900 dark:text-zinc-100">Tokens:</span>{" "}
+            <span>—</span>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

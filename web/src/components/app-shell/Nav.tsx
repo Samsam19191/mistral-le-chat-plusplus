@@ -8,6 +8,7 @@ const linkClass =
 const links = [
   { href: "/", label: "Home" },
   { href: "/chat", label: "Chat" },
+  { href: "/lab", label: "Lab" },
 ];
 
 export default function Nav() {
