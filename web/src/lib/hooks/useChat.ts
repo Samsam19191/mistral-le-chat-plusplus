@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   defaultStreamSettings,
@@ -19,19 +19,92 @@ const HISTORY_LIMIT = 20;
 interface UseChatOptions {
   initialMessages?: ChatMessage[];
   settings?: Partial<StreamSettings>;
+  defaults?: Partial<StreamSettings>;
 }
 
 // TODO: integrate token usage tracking once backend supports it.
 export function useChat({
   initialMessages = [SYSTEM_GREETING],
   settings,
+  defaults,
 }: UseChatOptions = {}) {
+  const [baseDefaults, setBaseDefaults] = useState<StreamSettings>({
+    ...defaultStreamSettings,
+    ...defaults,
+  });
+
+  const defaultsSignature = defaults
+    ? `${defaults.model ?? ""}|${defaults.temperature ?? ""}`
+    : null;
+
+  useEffect(() => {
+    if (defaults) {
+      setBaseDefaults((prev) => {
+        const nextModel = defaults.model ?? prev.model;
+        const nextTemp = defaults.temperature ?? prev.temperature;
+        if (nextModel === prev.model && nextTemp === prev.temperature) {
+          return prev;
+        }
+        return {
+          ...prev,
+          model: nextModel,
+          temperature: nextTemp,
+        };
+      });
+      return;
+    }
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadDefaults() {
+      try {
+        const response = await fetch("/api/chat/config");
+        if (!response.ok) return;
+        const data: {
+          model?: string;
+          temperature?: number;
+        } = await response.json();
+        if (cancelled) return;
+        setBaseDefaults((prev) => {
+          const nextModel =
+            typeof data.model === "string" && data.model.length > 0
+              ? data.model
+              : prev.model;
+          const nextTemp =
+            typeof data.temperature === "number"
+              ? data.temperature
+              : prev.temperature;
+          if (nextModel === prev.model && nextTemp === prev.temperature) {
+            return prev;
+          }
+          return {
+            ...prev,
+            model: nextModel,
+            temperature: nextTemp,
+          };
+        });
+      } catch {
+        // ignore config fetch failures
+      }
+    }
+
+    loadDefaults();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [defaultsSignature]);
+
   const settingsWithDefaults = useMemo<StreamSettings>(
     () => ({
-      ...defaultStreamSettings,
+      ...baseDefaults,
       ...settings,
     }),
-    [settings],
+    [baseDefaults, settings],
   );
 
   const initialSnapshotRef = useRef<ChatMessage[]>(
