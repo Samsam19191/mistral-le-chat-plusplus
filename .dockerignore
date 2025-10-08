@@ -1,0 +1,22 @@
+# Dependencies
+node_modules
+*/node_modules
+
+# Development files
+.next
+.vscode
+.idea
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+
+# Logs
+*.log
+
+# Docker
+Dockerfile*
+docker-compose*

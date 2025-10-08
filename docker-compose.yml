@@ -1,15 +1,15 @@
-version: "3.9"
-
 services:
   web:
     build:
       context: .
       dockerfile: docker/Dockerfile.web
+      target: base
     ports:
       - "3000:3000"
-    volumes:
-      - ./web:/app
-    command: pnpm dev
-    # Enable if file watching requires polling (e.g., some macOS setups)
-    # environment:
-    #   CHOKIDAR_USEPOLLING: "1"
+    environment:
+      - USE_MOCK=${USE_MOCK:-true}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+      - MISTRAL_MODEL=${MISTRAL_MODEL:-mistral-small-latest}
+      - TEMPERATURE_DEFAULT=${TEMPERATURE_DEFAULT:-0.2}
+    command: ["pnpm", "dev"]
+    restart: unless-stopped
