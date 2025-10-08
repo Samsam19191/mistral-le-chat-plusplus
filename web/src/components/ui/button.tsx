@@ -2,9 +2,8 @@
 
 // Button primitive that forwards refs and supports multiple variants.
 
+import React, { forwardRef } from "react";
 import type { ButtonHTMLAttributes } from "react";
-import { forwardRef } from "react";
-import type React from "react";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "outline" | "ghost";

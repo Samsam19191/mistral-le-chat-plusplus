@@ -182,34 +182,30 @@ export default function ChatPage() {
             <span className="font-semibold text-zinc-900 dark:text-zinc-100">Latency:</span>{" "}
             <span>{latencyMs != null ? `${Math.round(latencyMs)} ms` : "—"}</span>
           </div>
-          <div>
-            <span className="font-semibold text-zinc-900 dark:text-zinc-100">Tokens:</span>{" "}
-            <span>—</span>
-          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <Button
             type="button"
+            variant="outline"
             onClick={cancel}
             disabled={!isStreaming}
-            className="bg-zinc-200 text-zinc-900 hover:bg-zinc-300 disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
           >
             Stop
           </Button>
           <Button
             type="button"
+            variant="outline"
             onClick={retryLast}
             disabled={isStreaming || !messages.some((message) => message.role === "user")}
-            className="bg-zinc-200 text-zinc-900 hover:bg-zinc-300 disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
           >
             Retry
           </Button>
           <Button
             type="button"
+            variant="ghost"
             onClick={clear}
             disabled={isStreaming || messages.length === 0}
-            className="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 disabled:opacity-50 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
             Clear
           </Button>
