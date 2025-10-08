@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import Button from "@/components/ui/button";
+import { ClientTimestamp } from "@/components/ui/ClientTimestamp";
 import { useChat } from "@/lib/hooks/useChat";
 import type { ChatMessage } from "@/lib/types";
 
@@ -66,7 +67,6 @@ export default function ChatPage() {
 
   const sendDisabled = isStreaming || !input.trim();
 
-  const modeIsMock = config?.mode === "mock";
   const modeBadgeClass =
     config?.mode == null
       ? "bg-zinc-400"
@@ -150,9 +150,10 @@ export default function ChatPage() {
                   >
                     <div className="mb-1 flex items-center justify-between text-xs font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
                       <span>{ROLE_LABEL[message.role]}</span>
-                      <span className="tabular-nums">
-                        {new Date(message.createdAt).toLocaleTimeString()}
-                      </span>
+                      <ClientTimestamp 
+                        date={new Date(message.createdAt)} 
+                        className="tabular-nums"
+                      />
                     </div>
                     <p className="whitespace-pre-wrap text-zinc-700 dark:text-zinc-200">
                       {message.content}

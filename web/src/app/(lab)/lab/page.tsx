@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useRef, useState } from "react";
-import type { ButtonHTMLAttributes } from "react";
+import Button from "@/components/ui/button";
 
 type LabRunRecord = {
   label: "A" | "B";
@@ -301,20 +301,4 @@ function ResultCard({ label, output, isStreaming, latencyMs, charCount }: Result
   );
 }
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "default" | "outline" | "ghost";
-}
 
-function Button({ variant = "default", className = "", type = "button", ...props }: ButtonProps) {
-  const base =
-    "inline-flex items-center justify-center rounded-md border px-3 py-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 disabled:cursor-not-allowed disabled:opacity-60";
-  const variants: Record<string, string> = {
-    default:
-      "border-transparent bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200",
-    outline:
-      "border-zinc-300 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800",
-    ghost:
-      "border-transparent text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
-  };
-  return <button type={type} className={`${base} ${variants[variant]} ${className}`} {...props} />;
-}

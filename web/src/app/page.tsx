@@ -6,7 +6,7 @@ export default function HomePage() {
     <section className="space-y-6 py-12">
       <h1 className="text-3xl font-semibold">mistral-le-chat-plusplus</h1>
       <p className="text-zinc-500 dark:text-zinc-400">
-        Lightweight chat playground scaffolding. Use the link below to explore
+        Lightweight chat playground. Use the link below to explore
         the chat experience.
       </p>
       <Link
