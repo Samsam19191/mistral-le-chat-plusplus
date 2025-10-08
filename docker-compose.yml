@@ -6,10 +6,7 @@ services:
       target: base
     ports:
       - "3000:3000"
-    environment:
-      - USE_MOCK=${USE_MOCK:-true}
-      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
-      - MISTRAL_MODEL=${MISTRAL_MODEL:-mistral-small-latest}
-      - TEMPERATURE_DEFAULT=${TEMPERATURE_DEFAULT:-0.2}
+    volumes:
+      - ./web/.env:/app/web/.env:ro
     command: ["pnpm", "dev"]
     restart: unless-stopped
