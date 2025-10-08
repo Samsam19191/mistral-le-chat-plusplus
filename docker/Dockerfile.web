@@ -1,19 +1,48 @@
+# Multi-stage build for production
 FROM node:22-slim AS base
 
+# Install curl for health checks
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Install pnpm
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
-COPY web/pnpm-lock.yaml web/package.json ./
+# Copy workspace package files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY web/package.json ./web/
 
+# Install dependencies for the workspace
 RUN pnpm install --frozen-lockfile
 
-COPY web .
+# Copy web source code
+COPY web ./web
 
-RUN pnpm build
+# Copy datasets directory
+COPY datasets ./datasets
 
+# Set working directory to web
+WORKDIR /app/web
+
+# Production build stage
+FROM base AS production
+
+# Set environment variable to disable problematic Next.js features during build
+ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV production
+
+# Build the application
+RUN pnpm run build
+
+# Expose port
 EXPOSE 3000
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/api/chat/config || exit 1
+
+# Start the application
 CMD ["pnpm", "start"]

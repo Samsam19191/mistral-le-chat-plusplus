@@ -24,10 +24,10 @@ export const envSchema = z
       .refine((value) => value >= 0 && value <= 2, {
         message: "TEMPERATURE_DEFAULT must be between 0 and 2",
       }),
-    MISTRAL_API_KEY: z.string().min(1).optional(),
+    MISTRAL_API_KEY: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    if (!data.USE_MOCK && !data.MISTRAL_API_KEY) {
+    if (!data.USE_MOCK && (!data.MISTRAL_API_KEY || data.MISTRAL_API_KEY.length === 0)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "MISTRAL_API_KEY is required when USE_MOCK is false",

@@ -1,4 +1,4 @@
-.PHONY: setup dev lint typecheck test test\:e2e test\:e2e\:ci build start
+.PHONY: setup dev lint typecheck test test\:e2e test\:e2e\:ci build start docker\:build docker\:up docker\:down docker\:dev
 
 setup:
 	cd web && pnpm install
@@ -26,3 +26,12 @@ build:
 
 start:
 	cd web && pnpm start
+
+docker\:build:
+	docker compose build
+
+docker\:up:
+	docker compose up -d
+
+docker\:down:
+	docker compose down
