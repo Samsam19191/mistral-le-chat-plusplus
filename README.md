@@ -23,7 +23,7 @@ git clone https://github.com/Samsam19191/mistral-le-chat-plusplus.git
 cd mistral-le-chat-plusplus
 
 # 2) Install & run in mock mode (no API key needed)
-cp .env.example .env
+cp web/.env.example web/.env
 make setup
 make dev
 ```
@@ -37,7 +37,7 @@ Open http://localhost:3000
 **Switch to Real Mode (locally):**
 
 ```bash
-# in .env
+# in web/.env
 USE_MOCK=false
 MISTRAL_API_KEY=your_actual_key_here
 MISTRAL_MODEL=mistral-small-latest
@@ -71,8 +71,8 @@ Open http://localhost:3000
 2. Configure environment:
 
 ```bash
-cp .env.example .env
-# Edit .env:
+cp web/.env.example web/.env
+# Edit web/.env:
 # USE_MOCK=false
 # MISTRAL_API_KEY=your_actual_key_here
 # (optional) MISTRAL_MODEL=mistral-small-latest
